@@ -1,20 +1,13 @@
 import styled, { css } from "styled-components";
-import Button from "../../ui/Button";
-import ButtonGroup from "../../ui/ButtonGroup";
+
 import { useDeleteComputer } from "./useDeleteComputer";
 import CreateComputerForm from "./CreateComputerForm";
+
+import Button from "../../ui/Button";
+import ButtonGroup from "../../ui/ButtonGroup";
+import Table from "../../ui/Table";
 import Modal from "../../ui/Modal";
-
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr 0.6fr;
-  column-gap: 2.4rem;
-  padding: 1.4rem 2.4rem;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-`;
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const Status = styled.div`
   padding: 0.4rem 1.4rem;
@@ -22,6 +15,8 @@ const Status = styled.div`
   width: fit-content;
   border-radius: 4px;
   text-transform: capitalize;
+  font-weight: 600;
+  font-size: 1.3rem;
 
   ${(props) =>
     props.type === "available" &&
@@ -49,26 +44,20 @@ Status.defaultProps = {
   type: "available",
 };
 
-function ComputerRow({ computer }) {
+function ComputerRow({ computer, packages }) {
   const { isDeleting, deleteComputer } = useDeleteComputer();
 
-  const {
-    id: computerId,
-    name,
-    availablePackage,
-    status,
-    statusUntil,
-  } = computer;
+  const { id: computerId, name, status, statusUntil } = computer;
 
   return (
-    <TableRow role="row">
+    <Table.Row role="row">
       <div>{name}</div>
       <div>
-        {availablePackage.map((item) => (
-          <li key={item}>{item}</li>
+        {packages.map((item) => (
+          <li key={item.id}>{item.name}</li>
         ))}
       </div>
-      <Status>{status}</Status>
+      <Status type={status}>{status}</Status>
       <div>{statusUntil}</div>
       <ButtonGroup>
         <Modal>
@@ -80,16 +69,23 @@ function ComputerRow({ computer }) {
           </Modal.Window>
         </Modal>
 
-        <Button
-          size="small"
-          variation="danger"
-          disabled={isDeleting}
-          onClick={() => deleteComputer(computerId)}
-        >
-          Delete
-        </Button>
+        <Modal>
+          <Modal.Open opens="delete">
+            <Button size="small" variation="danger">
+              Delete
+            </Button>
+          </Modal.Open>
+          <Modal.Window name="delete" title="Delete Computer">
+            <ConfirmDelete
+              resourceCategory="Computer"
+              resourceName={name}
+              disabled={isDeleting}
+              onConfirm={() => deleteComputer(computerId)}
+            />
+          </Modal.Window>
+        </Modal>
       </ButtonGroup>
-    </TableRow>
+    </Table.Row>
   );
 }
 

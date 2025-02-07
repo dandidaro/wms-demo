@@ -7,39 +7,45 @@ import Form, { FormRow, Input, Label } from "../../ui/Form";
 
 import { useCreateComputer } from "./useCreateComputer";
 import { useUpdateComputer } from "./useUpdateComputer";
+import usePackages from "../packages/usePackages";
+import Spinner from "../../ui/Spinner";
 
 function CreateComputerForm({ computerToEdit = {}, onCloseModal }) {
-  const defaultComputer = { name: "", availablePackage: [] };
+  const defaultComputer = { name: "" };
   const { id: editId, ...editValues } = computerToEdit;
   const isEditSession = Boolean(editId);
 
-  const { register, handleSubmit, reset, setValue, getValues, control } =
-    useForm({
-      defaultValues: isEditSession ? editValues : {},
-    });
+  // IF edit session, populate package to fill multiselect
+  if (isEditSession) {
+    editValues.packages = editValues.packages.map((item) => ({
+      id: item.id,
+      value: item.name,
+      label: item.name,
+    }));
+  }
+
+  const { register, handleSubmit, reset, control } = useForm({
+    defaultValues: isEditSession ? editValues : defaultComputer,
+  });
+
+  const { isLoading: isLoadingPackage, packages } = usePackages();
   const { isCreating, createComputer } = useCreateComputer();
   const { isUpdating, updateComputer } = useUpdateComputer();
   const isWorking = isCreating || isUpdating;
 
-  let existingAvailablePackages = [];
-  if (isEditSession) {
-    existingAvailablePackages = editValues.availablePackage.map((item) => ({
-      value: item,
-      label: item,
-    }));
-    console.log(editValues);
-    // setValue("availablePackage", existingAvailablePackages);
-  }
+  if (isLoadingPackage) return <Spinner />;
+
+  const availablePackages = packages.map((item) => ({
+    id: item.id,
+    value: item.name,
+    label: item.name,
+  }));
 
   function onSubmit(data) {
-    const selectedPackages = getValues(["availablePackage"])[0].map(
-      (item) => item.value
-    );
-
     if (isEditSession)
       updateComputer(
         {
-          newComputer: { ...data, availablePackage: selectedPackages },
+          newComputer: { ...data },
           id: editId,
         },
         {
@@ -51,7 +57,7 @@ function CreateComputerForm({ computerToEdit = {}, onCloseModal }) {
     else {
       createComputer(
         {
-          newComputer: { ...data, availablePackage: selectedPackages },
+          newComputer: { ...data },
         },
         {
           onSuccess: () => {
@@ -80,21 +86,20 @@ function CreateComputerForm({ computerToEdit = {}, onCloseModal }) {
       </FormRow>
 
       <FormRow>
-        <Label>Test</Label>
+        <Label>Package List</Label>
         <Controller
           control={control}
-          name="availablePackage"
-          render={({ field }) => (
+          name="packages"
+          render={({ field: { value, onChange } }) => (
             <ReactSelect
+              closeMenuOnSelect={false}
               isDisabled={isWorking}
               isClearable
               isMulti
               required={true}
-              {...field}
-              options={[
-                { value: "Reguler", label: "Reguler" },
-                { value: "Paket Malam", label: "Paket Malam" },
-              ]}
+              options={availablePackages}
+              onChange={(value) => onChange(value.sort((a, b) => b.id - a.id))}
+              value={value}
             />
           )}
         />

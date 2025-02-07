@@ -29,7 +29,7 @@ Form.defaultProps = {
 export const FormRow = styled.div`
   display: grid;
   align-items: center;
-  grid-template-columns: 24rem 1fr;
+  grid-template-columns: 24rem 1.5fr;
   gap: 2.4rem;
 
   padding: 1.2rem 0;
@@ -71,6 +71,12 @@ export const Dropdown = styled.select`
   border-radius: var(--border-radius-sm);
   padding: 0.8rem 1.2rem;
   box-shadow: var(--shadow-sm);
+`;
+
+export const Error = styled.span`
+  font-size: 1.4rem;
+  color: var(--color-red-700);
+  margin-top: -1.2rem;
 `;
 
 export default Form;

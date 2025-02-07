@@ -3,6 +3,7 @@ import { HiXMark } from "react-icons/hi2";
 import styled from "styled-components";
 
 import useOutsideClick from "../hooks/useOutsideClick";
+import Heading from "../ui/Heading";
 
 const ModalContent = styled.div`
   display: flex;
@@ -101,7 +102,7 @@ function Window({ children, name, title = "Add Title" }) {
           <HiXMark />
         </Button>
         <ModalContent>
-          <h2>{title}</h2>
+          <Heading as="h2">{title}</Heading>
           <div>{cloneElement(children, { onCloseModal: close })}</div>
         </ModalContent>
       </StyledModal>
